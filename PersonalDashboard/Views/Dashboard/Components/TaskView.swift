@@ -18,9 +18,10 @@ struct TaskView: View {
     }
     
     @State var tasks: [Task] = [
-        Task(title: "Comprar Pan"),
-        Task(title: "Comprar Queso"),
-        Task(title: "Tarea 1")
+        Task(title: "Hacer pantalla transacciones KORA", isUrgent: true),
+        Task(title: "Arreglar tamaño vista de tareas", isCompleted: true),
+        Task(title: "Adaptar a modo landscape", isUrgent: true),
+        Task(title: "Ejecutar desarrollo en iPad físico para probar el correcto funcionamiento del aplicación")
     ]
     
     @State var newTaskTitle: String = ""
@@ -62,6 +63,7 @@ struct TaskView: View {
                 }
                 HStack(alignment: .firstTextBaseline){
                     Image(systemName: "circle.dotted").opacity(0.5)
+                        .font(.title2)
                     TextField("", text: $newTaskTitle)
                         .focused($isNewTaskFocused)
                         .onSubmit {
@@ -104,6 +106,7 @@ struct TaskRow: View {
                 task.isCompleted.toggle()
             }) {
                 Image(systemName: task.isCompleted ? "inset.filled.circle" : "circle").foregroundStyle(task.isCompleted ? task.isUrgent ? .orange : .blue : .black)
+                    .font(.title2)
             }.buttonStyle(.plain)
             TextField(task.title, text: $task.title)
                 .font(Font.system(size: 18))

@@ -25,7 +25,8 @@ struct HabitView: View {
         Habit(title: "Leer", icon: "book", repetitions: "l,m,x,j,v,s,d"),
         Habit(title: "Dibujar", icon: "paintbrush.pointed", repetitions: "l,m,x,d")
     ]
-    
+    @State private var orientacion: UIDeviceOrientation = UIDevice.current.orientation
+
     let iconos: [String] = [
         "figure.strengthtraining.traditional",
         "figure.run",
@@ -65,37 +66,79 @@ struct HabitView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12){
-            Text("Hábitos")
-                .font(Font.system(size: 30, weight: .semibold))
-                .padding()
-            ScrollView(.horizontal, showsIndicators: false){
-                HStack(alignment: .center, spacing: 10){
-                    ForEach(habits.indices.filter { habits[$0].isActive }, id: \.self) { index in
-                        let habit = habits[index]
-                        HStack(spacing: 8) {
-                            Image(systemName: habit.icon).font(.largeTitle)
-                            Button(action: {
-                                habits[index].isCompleted.toggle()
-                            }) {
-                                Image(systemName: habit.isCompleted ? "checkmark.square.fill" : "square")
-                                    .foregroundStyle(habit.isCompleted ? .blue : .black)
-                                    .font(.largeTitle)
+            HStack(alignment: .firstTextBaseline, spacing: 8){
+                Text("Hábitos")
+                    .font(Font.system(size: 30, weight: .semibold))
+                Image(systemName: "arrow.up.forward.square")
+                    .font(.headline)
+            }.padding()
+            
+            if(orientacion.isPortrait){
+                ScrollView(.horizontal, showsIndicators: false){
+                    HStack(alignment: .center, spacing: 10){
+                        ForEach(habits.indices.filter { habits[$0].isActive }, id: \.self) { index in
+                            let habit = habits[index]
+                            HStack(spacing: 8) {
+                                Image(systemName: habit.icon).font(.largeTitle)
+                                Button(action: {
+                                    habits[index].isCompleted.toggle()
+                                }) {
+                                    Image(systemName: habit.isCompleted ? "checkmark.square.fill" : "square")
+                                        .foregroundStyle(habit.isCompleted ? .blue : .black)
+                                        .font(.largeTitle)
+                                }
                             }
-                        }
-                        .padding()
-                        .background(.gray.opacity(0.2))
-                        .clipShape(Capsule())
-                    }
-                    Button(action: {isModalShown = true}){
-                        Image(systemName: "plus")
-                            .font(.largeTitle)
-                            .foregroundStyle(.black)
                             .padding()
                             .background(.gray.opacity(0.2))
                             .clipShape(Capsule())
+                        }
+                        Button(action: {isModalShown = true}){
+                            Image(systemName: "plus")
+                                .font(.largeTitle)
+                                .foregroundStyle(.black)
+                                .padding()
+                                .background(.gray.opacity(0.2))
+                                .clipShape(Capsule())
+                        }
+                    }.frame(maxWidth: .infinity, alignment: .center)
+                }.padding(.horizontal, 20)
+            } else {
+                ScrollView(.vertical, showsIndicators: false){
+                    VStack(alignment: .leading, spacing: 10){
+                        ForEach(habits.indices.filter { habits[$0].isActive }, id: \.self) { index in
+                            let habit = habits[index]
+                            HStack(spacing: 8) {
+                                Button(action: {
+                                    habits[index].isCompleted.toggle()
+                                }) {
+                                    Image(systemName: habit.isCompleted ? "checkmark.square.fill" : "square")
+                                        .foregroundStyle(habit.isCompleted ? .blue : .black)
+                                        .font(.largeTitle)
+                                }
+                                Image(systemName: habit.icon).font(.largeTitle)
+                                Text(habit.title).font(.title2)
+                            }
+                            .padding()
+                        }
+                            Button(action: {isModalShown = true}){
+                                Image(systemName: "plus")
+                                    .font(.title)
+                                    .foregroundStyle(.black)
+                                Text("Nuevo hábito")
+                            }.buttonStyle(.plain)
+                            .padding(.vertical, 10)
+                            .padding(.trailing, 20)
+                            .padding(.leading)
+                            .background(.gray.opacity(0.2))
+                            .clipShape(Capsule())
+                            .padding(.horizontal, 20)
+                        
                     }
-                }.frame(maxWidth: .infinity, alignment: .center)
-            }.padding(.horizontal, 20)
+                }
+                
+            }
+            
+            
         }
         //Modal
         .sheet(isPresented: $isModalShown) {
@@ -160,7 +203,7 @@ struct HabitView: View {
             .padding(20)
             .presentationDetents([.height(350)])
         }
-        //Fin modal
+        .padding(.vertical, 20)
     }
     
     private func createNewHabit() {
