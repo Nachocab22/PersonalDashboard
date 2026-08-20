@@ -10,9 +10,11 @@ import SwiftData
 
 @main
 struct PersonalDashboardApp: App {
-    var sharedModelContainer: ModelContainer = {
+    private let sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Task.self,
+            TaskItem.self,
+            Habit.self,
+            HabitCompletion.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
