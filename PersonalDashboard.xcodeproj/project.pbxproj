@@ -187,11 +187,12 @@
 				};
 			};
 			buildConfigurationList = E160543D2FE6DE9300C66ED9 /* Build configuration list for PBXProject "PersonalDashboard" */;
-			developmentRegion = en;
+			developmentRegion = es;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
+				es,
 			);
 			mainGroup = E16054392FE6DE9300C66ED9;
 			minimizedProjectReferenceProxies = 1;

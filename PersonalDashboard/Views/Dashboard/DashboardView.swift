@@ -80,7 +80,7 @@ struct TitleSection: View {
                     .bold()
                 HStack(alignment: .center){
                     Button(action: {isCalendarShown = true}, label: {
-                        Text(selectedDay.formatted(date: .long, time: .omitted))
+                        Text(selectedDay, format: .dateTime .day() .month(.wide) .year())
                             .font(.title)
                         Image(systemName: "chevron.down")
                     })
@@ -88,7 +88,7 @@ struct TitleSection: View {
                     .popover(isPresented: $isCalendarShown) {
                         VStack {
                             DatePicker(
-                                "Nueva fecha",
+                                "Dia que mostrar",
                                 selection: $selectedDay,
                                 displayedComponents: .date
                             )
@@ -138,6 +138,11 @@ struct TitleSection: View {
     }
 }
 
-#Preview("Idea inicial") {
+#Preview("Default") {
     DashboardView()
+}
+
+#Preview("Ingles") {
+    DashboardView()
+        .environment(\.locale, Locale(identifier: "en_GB"))
 }
