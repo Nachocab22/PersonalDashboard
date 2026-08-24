@@ -6,48 +6,66 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct TaskView: View {
     
-    struct Task : Identifiable {
-        let id: UUID = UUID()
-        var title: String
-        var isCompleted: Bool = false
-        var isUrgent: Bool = false
-        var isDeleted: Bool = false
-    }
+    @Environment(\.modelContext) private var modelContext
     
-    @State var tasks: [Task] = [
-        Task(title: "Hacer pantalla transacciones KORA", isUrgent: true),
-        Task(title: "Arreglar tamaño vista de tareas", isCompleted: true),
-        Task(title: "Adaptar a modo landscape", isUrgent: true),
-        Task(title: "Ejecutar desarrollo en iPad físico para probar el correcto funcionamiento del aplicación")
-    ]
+    @Query private var priorityTasks: [TaskItem]
+    @Query private var tasks: [TaskItem]
     
-    @State var newTaskTitle: String = ""
-    @FocusState private var isNewTaskFocused : Bool
-    
-    var body: some View {
-        
-        var urgentTaskIndices: [Int] {
-            tasks.indices.filter {
-                tasks[$0].isUrgent && !tasks[$0].isDeleted
-            }
+    @State private var newTaskTitle = ""
+    @FocusState private var isNewTaskFocused: Bool
+
+    init(
+        day: Date = .now,
+        calendar: Calendar = .autoupdatingCurrent
+    ) {
+        let startOfDay = calendar.startOfDay(for: day)
+
+        let startOfNextDay = calendar.date(
+            byAdding: .day,
+            value: 1,
+            to: startOfDay
+        )!
+
+        let priorityPredicate = #Predicate<TaskItem> { task in
+            task.deletedAt == nil &&
+            task.isPriority &&
+            task.scheduledFor >= startOfDay &&
+            task.scheduledFor < startOfNextDay
         }
 
-        var normalTaskIndices: [Int] {
-            tasks.indices.filter {
-                !tasks[$0].isUrgent && !tasks[$0].isDeleted
-            }
+        let normalPredicate = #Predicate<TaskItem> { task in
+            task.deletedAt == nil &&
+            !task.isPriority &&
+            task.scheduledFor >= startOfDay &&
+            task.scheduledFor < startOfNextDay
         }
+
+        _priorityTasks = Query(
+            filter: priorityPredicate,
+            sort: \TaskItem.completedAt,
+            order: .forward
+        )
+
+        _tasks = Query(
+            filter: normalPredicate,
+            sort: \TaskItem.completedAt,
+            order: .forward
+        )
+    }
+    
+    var body: some View {
         
         VStack(alignment: .leading){
             Text("Tareas")
                 .font(Font.system(size: 30, weight: .semibold))
                 .padding()
             List {
-                ForEach(urgentTaskIndices, id: \.self) { index in
-                    TaskRow(task: $tasks[index])
+                ForEach(priorityTasks) { task in
+                    TaskRow(task: task)
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                         .listRowBackground(
@@ -57,8 +75,8 @@ struct TaskView: View {
                                 .padding(.horizontal, 8)
                         )
                 }
-                ForEach(normalTaskIndices, id: \.self) { index in
-                    TaskRow(task: $tasks[index])
+                ForEach(tasks) { task in
+                    TaskRow(task: task)
                         .listRowSeparator(.hidden)
                 }
                 HStack(alignment: .firstTextBaseline){
@@ -86,7 +104,7 @@ struct TaskView: View {
         
         guard !title.isEmpty else { return }
         
-        tasks.append(Task(title: title))
+        modelContext.insert(TaskItem(title: title))
         newTaskTitle = ""
     }
     
@@ -98,14 +116,22 @@ struct TaskView: View {
 
 struct TaskRow: View {
     
-    @Binding var task: TaskView.Task
+    @Bindable var task: TaskItem
+    
+    @State private var isCalendarShown = false
+    @State private var dateSelected = Date()
     
     var body: some View {
         HStack {
             Button(action: {
-                task.isCompleted.toggle()
+                if (task.completedAt == nil) {
+                    task.completedAt = .now
+                } else {
+                    task.completedAt = nil
+                }
+                    
             }) {
-                Image(systemName: task.isCompleted ? "inset.filled.circle" : "circle").foregroundStyle(task.isCompleted ? task.isUrgent ? .orange : .blue : .black)
+                Image(systemName: task.completedAt != nil ? "inset.filled.circle" : "circle").foregroundStyle(task.completedAt != nil ? task.isPriority ? .orange : .blue : .black)
                     .font(.title2)
             }.buttonStyle(.plain)
             TextField(task.title, text: $task.title)
@@ -114,19 +140,59 @@ struct TaskRow: View {
                 
         }.swipeActions(edge: .trailing, allowsFullSwipe: false) {
             Button {
-                task.isDeleted.toggle()
+                task.deletedAt = .now
             } label: {
                 Label("Eliminar", systemImage: "trash"
                 )
             }.tint(.red)
             Button {
-                task.isUrgent.toggle()
+                task.isPriority.toggle()
             } label: {
                 Label(
-                    task.isUrgent ? "No urgente" : "Urgente",
-                    systemImage: task.isUrgent ? "xmark.octagon" : "exclamationmark.octagon"
+                    task.isPriority ? "No urgente" : "Urgente",
+                    systemImage: task.isPriority ? "xmark.octagon" : "exclamationmark.octagon"
                 )
-            }.tint(task.isUrgent ? .gray : .orange)
+            }.tint(task.isPriority ? .gray : .orange)
+        }.swipeActions(edge: .leading, allowsFullSwipe: false){
+            Button {
+                dateSelected = task.scheduledFor
+                isCalendarShown = true
+            } label: {
+                Label("Posponer", systemImage: "chevron.forward.2"
+                )
+            }.tint(.blue)
         }.frame(maxWidth: .greatestFiniteMagnitude, alignment: .leading)
+            .popover(isPresented: $isCalendarShown) {
+                VStack {
+                    DatePicker(
+                        "Nueva fecha",
+                        selection: $dateSelected,
+                        displayedComponents: .date
+                    )
+                    .datePickerStyle(.graphical)
+
+                    HStack {
+                        Button("Cancelar") {
+                            isCalendarShown = false
+                        }
+
+                        Spacer()
+
+                        Button("Reprogramar") {
+                            task.reschedule(to: dateSelected)
+                            task.postponementCount += 1
+                            isCalendarShown = false
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
+                }
+                .padding()
+                .frame(width: 330)
+                .presentationCompactAdaptation(.popover)
+            }
+    }
+    
+    func posponeTask(task: TaskItem) {
+        
     }
 }
