@@ -84,7 +84,7 @@ struct HabitView: View {
                                     habits[index].isCompleted.toggle()
                                 }) {
                                     Image(systemName: habit.isCompleted ? "checkmark.square.fill" : "square")
-                                        .foregroundStyle(habit.isCompleted ? .blue : .black)
+                                        .foregroundStyle(habit.isCompleted ? .blue : .primary)
                                         .font(.largeTitle)
                                 }
                             }
@@ -95,7 +95,7 @@ struct HabitView: View {
                         Button(action: {isModalShown = true}){
                             Image(systemName: "plus")
                                 .font(.largeTitle)
-                                .foregroundStyle(.black)
+                                .foregroundStyle(.primary)
                                 .padding()
                                 .background(.gray.opacity(0.2))
                                 .clipShape(Capsule())
@@ -112,7 +112,7 @@ struct HabitView: View {
                                     habits[index].isCompleted.toggle()
                                 }) {
                                     Image(systemName: habit.isCompleted ? "checkmark.square.fill" : "square")
-                                        .foregroundStyle(habit.isCompleted ? .blue : .black)
+                                        .foregroundStyle(habit.isCompleted ? .blue : .primary)
                                         .font(.largeTitle)
                                 }
                                 Image(systemName: habit.icon).font(.largeTitle)
@@ -123,7 +123,7 @@ struct HabitView: View {
                             Button(action: {isModalShown = true}){
                                 Image(systemName: "plus")
                                     .font(.title)
-                                    .foregroundStyle(.black)
+                                    .foregroundStyle(.primary)
                                 Text("Nuevo hábito")
                             }.buttonStyle(.plain)
                             .padding(.vertical, 10)
@@ -161,7 +161,7 @@ struct HabitView: View {
                         } label: {
                             Image(systemName: icono)
                                 .font(.title)
-                                .foregroundStyle(newHabitIcon == icono ? .blue : .black)
+                                .foregroundStyle(newHabitIcon == icono ? .blue : .primary)
                                 .frame(width: 50, height: 50)
                                 .background(
                                     RoundedRectangle(cornerRadius: 30)
@@ -186,7 +186,7 @@ struct HabitView: View {
                         } label: {
                             Image(systemName: habitRepetitions.contains(weekDayIcon) ? weekDayIcon + ".fill" : weekDayIcon)
                                 .font(.largeTitle)
-                                .foregroundStyle(habitRepetitions.contains(weekDayIcon) ? .blue : .black)
+                                .foregroundStyle(habitRepetitions.contains(weekDayIcon) ? .blue : .primary)
                         }
                     }
                 }

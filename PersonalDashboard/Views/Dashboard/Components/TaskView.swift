@@ -131,7 +131,7 @@ struct TaskRow: View {
                 }
                     
             }) {
-                Image(systemName: task.completedAt != nil ? "inset.filled.circle" : "circle").foregroundStyle(task.completedAt != nil ? task.isPriority ? .orange : .blue : .black)
+                Image(systemName: task.completedAt != nil ? "inset.filled.circle" : "circle").foregroundStyle(task.completedAt != nil ? task.isPriority ? .orange : .blue : .primary)
                     .font(.title2)
             }.buttonStyle(.plain)
             TextField(task.title, text: $task.title)
