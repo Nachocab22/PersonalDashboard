@@ -9,45 +9,56 @@ import SwiftUI
 
 struct DashboardView: View {
     
-    @State private var orientacion: UIDeviceOrientation = UIDevice.current.orientation
+    @State private var isPortrait: Bool = !UIDevice.current.orientation.isLandscape
+
     @State var selectedDay = Date.now
     @State var isCalendarShown: Bool = false
     
     var body: some View {
+        
         TitleSection(selectedDay: $selectedDay, isCalendarShown: $isCalendarShown)
         
-        if(orientacion.isLandscape){
-            GeometryReader { geo in
-            
-                let agendaWidth = geo.size.width * 0.35
-                let taskWidth = geo.size.width * 0.35
-                let habitWidth = geo.size.width * 0.3
-                
-                HStack(alignment: .top) {
-                    AgendaView().frame(width: agendaWidth)
-                    TaskView(day: selectedDay).frame(width: taskWidth)
-                    HabitView().frame(width: habitWidth)
-                }.frame(width: geo.size.width, height: geo.size.height)
-                    .onReceive(NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)) { _ in
-                        self.orientacion = UIDevice.current.orientation
-                    }
-                    .padding(.horizontal, 24)
-                
-            }
-        } else {
-            VStack() {
-                HStack {
-                    AgendaView()
-                    TaskView(day: selectedDay)
+        GeometryReader { geometry in
+            if(!isPortrait){
                     
+                    let agendaWidth = geometry.size.width * 0.35
+                    let taskWidth = geometry.size.width * 0.35
+                    let habitWidth = geometry.size.width * 0.3
+                    
+                    HStack(alignment: .top) {
+                        AgendaView().frame(width: agendaWidth)
+                        TaskView(day: selectedDay).frame(width: taskWidth)
+                        HabitView(isPortrait: isPortrait, day: selectedDay).frame(width: habitWidth)
+                    }.frame(width: geometry.size.width, height: geometry.size.height)
+                        .padding(.horizontal, 24)
+                    
+            } else {
+                VStack() {
+                    HStack {
+                        AgendaView()
+                        TaskView(day: selectedDay)
+                        
+                    }
+                    HabitView(isPortrait: isPortrait, day: selectedDay)
                 }
-                HabitView()
-            }.onReceive(NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)) { _ in
-                self.orientacion = UIDevice.current.orientation
             }
+        }.onReceive(
+            NotificationCenter.default.publisher(
+                            for: UIDevice.orientationDidChangeNotification
+            )
+        ){ _ in
+            let orientation = UIDevice.current.orientation
+
+            // Ignora estados transitorios como faceUp, faceDown o unknown.
+            guard orientation.isPortrait || orientation.isLandscape else {
+                return
+            }
+
+            isPortrait = orientation.isPortrait
         }
     }
 }
+
 
 struct TitleSection: View {
         
