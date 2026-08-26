@@ -24,7 +24,7 @@ final class Habit {
     var title: String
     var icon: String
     var repetitionDays: [Weekday]
-    var isActive: Bool = true
+    var isActive: Bool
     var createdAt: Date
     
     @Relationship(deleteRule: .cascade,
@@ -36,8 +36,7 @@ final class Habit {
          title: String,
          icon: String,
          repetitionDays: [Weekday],
-         isCompleted: Bool,
-         isActive: Bool,
+         isActive: Bool = true,
          createdAt: Date = .now
         )
     {
@@ -72,6 +71,29 @@ extension Habit {
 
         return completions.first {
             calendar.isDate($0.day, inSameDayAs: requestedDay)
+        }
+    }
+    
+    @MainActor
+    func toggleCompletion(
+        on date: Date,
+        in modelContext: ModelContext,
+        calendar: Calendar = .current
+    ) {
+        if let existingCompletion = completion(
+            on: date,
+            calendar: calendar
+        ) {
+            // Ya estaba completado: se desmarca eliminando el registro.
+            modelContext.delete(existingCompletion)
+        } else {
+            // No estaba completado: se crea el registro del día.
+            let newCompletion = HabitCompletion(
+                day: date,
+                habit: self
+            )
+
+            modelContext.insert(newCompletion)
         }
     }
 

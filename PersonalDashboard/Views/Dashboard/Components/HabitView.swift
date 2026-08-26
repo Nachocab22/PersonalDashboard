@@ -6,26 +6,48 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct HabitView: View {
     
-    struct Habit: Identifiable {
-        let id: UUID = UUID()
-        let title: String
-        let icon: String
-        let repetitions: String
-        var isCompleted: Bool = false
-        var isActive: Bool = true
-    }
+    @Environment(\.modelContext) private var modelContext
+    public var isPortrait: Bool
+    private let day: Date
+    private let calendar: Calendar
     
+    @Query(
+            filter: #Predicate<Habit> { habit in
+                habit.isActive
+            },
+            sort: \Habit.createdAt,
+            order: .reverse
+        )
+        private var activeHabits: [Habit]
+
+        private var todayHabits: [Habit] {
+            activeHabits.filter { habit in
+                habit.isScheduled(
+                    on: day,
+                    calendar: calendar
+                )
+            }
+        }
+
+        init(
+            isPortrait: Bool,
+            day: Date = .now,
+            calendar: Calendar = .autoupdatingCurrent
+        ) {
+            self.isPortrait = isPortrait
+            self.day = day
+            self.calendar = calendar
+        }
+    
+    ///Campos Form
+    @State private var newHabitTitle: String = ""
+    @State private var newHabitIcon: String = ""
+    @State private var habitRepetitions: [String] = []
     @State private var isModalShown: Bool = false
-    @State private var habits: [Habit] = [
-        Habit(title: "Ir al gym", icon: "figure.strengthtraining.traditional", repetitions: "m,s,d"),
-        Habit(title: "Salir a correr", icon: "figure.run", repetitions: "l,s,d"),
-        Habit(title: "Leer", icon: "book", repetitions: "l,m,x,j,v,s,d"),
-        Habit(title: "Dibujar", icon: "paintbrush.pointed", repetitions: "l,m,x,d")
-    ]
-    @State private var orientacion: UIDeviceOrientation = UIDevice.current.orientation
 
     let iconos: [String] = [
         "figure.strengthtraining.traditional",
@@ -58,86 +80,84 @@ struct HabitView: View {
             GridItem(.flexible()),
             GridItem(.flexible())
         ]
-    
-    //Campos Form
-    @State private var newHabitTitle: String = ""
-    @State private var newHabitIcon: String = ""
-    @State private var habitRepetitions: [String] = []
+    ///Fin Campos Form
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12){
-            HStack(alignment: .firstTextBaseline, spacing: 8){
+            HStack(alignment: .center, spacing: 8){
                 Text("Hábitos")
                     .font(Font.system(size: 30, weight: .semibold))
                 Image(systemName: "arrow.up.forward.square")
                     .font(.headline)
             }.padding()
-            
-            if(orientacion.isPortrait){
-                ScrollView(.horizontal, showsIndicators: false){
-                    HStack(alignment: .center, spacing: 10){
-                        ForEach(habits.indices.filter { habits[$0].isActive }, id: \.self) { index in
-                            let habit = habits[index]
-                            HStack(spacing: 8) {
-                                Image(systemName: habit.icon).font(.largeTitle)
-                                Button(action: {
-                                    habits[index].isCompleted.toggle()
-                                }) {
-                                    Image(systemName: habit.isCompleted ? "checkmark.square.fill" : "square")
-                                        .foregroundStyle(habit.isCompleted ? .blue : .primary)
-                                        .font(.largeTitle)
+                
+                if(isPortrait){ ///Vista vertical
+                    ScrollView(.horizontal, showsIndicators: false){
+                        HStack(alignment: .center, spacing: 10){
+                            ForEach(todayHabits){ habit in
+                                HStack(spacing: 8) {
+                                    Image(systemName: habit.icon).font(.largeTitle)
+                                    Button{
+                                        habit.toggleCompletion(
+                                                on: .now,
+                                                in: modelContext
+                                            )
+                                    } label: {
+                                        Image(systemName: habit.isCompleted(on: .now) ? "checkmark.square.fill" : "square")
+                                            .foregroundStyle(habit.isCompleted(on: .now) ? .blue : .primary)
+                                            .font(.largeTitle)
+                                    }
                                 }
-                            }
-                            .padding()
-                            .background(.gray.opacity(0.2))
-                            .clipShape(Capsule())
-                        }
-                        Button(action: {isModalShown = true}){
-                            Image(systemName: "plus")
-                                .font(.largeTitle)
-                                .foregroundStyle(.primary)
                                 .padding()
                                 .background(.gray.opacity(0.2))
                                 .clipShape(Capsule())
-                        }
-                    }.frame(maxWidth: .infinity, alignment: .center)
-                }.padding(.horizontal, 20)
-            } else {
-                ScrollView(.vertical, showsIndicators: false){
-                    VStack(alignment: .leading, spacing: 10){
-                        ForEach(habits.indices.filter { habits[$0].isActive }, id: \.self) { index in
-                            let habit = habits[index]
-                            HStack(spacing: 8) {
-                                Button(action: {
-                                    habits[index].isCompleted.toggle()
-                                }) {
-                                    Image(systemName: habit.isCompleted ? "checkmark.square.fill" : "square")
-                                        .foregroundStyle(habit.isCompleted ? .blue : .primary)
-                                        .font(.largeTitle)
-                                }
-                                Image(systemName: habit.icon).font(.largeTitle)
-                                Text(habit.title).font(.title2)
                             }
-                            .padding()
-                        }
+                            Button(action: {isModalShown = true}){
+                                Image(systemName: "plus")
+                                    .font(.largeTitle)
+                                    .foregroundStyle(.primary)
+                                    .padding()
+                                    .background(.gray.opacity(0.2))
+                                    .clipShape(Capsule())
+                            }.buttonStyle(.plain)
+                        }.frame(maxWidth: .infinity, alignment: .center)
+                    }.padding(.horizontal, 20)
+                } else { ///Vista Horizontal
+                    ScrollView(.vertical, showsIndicators: false){
+                        VStack(alignment: .leading, spacing: 10){
+                            ForEach(todayHabits){ habit in
+                                HStack(spacing: 8) {
+                                    Button{
+                                        habit.toggleCompletion(
+                                                on: .now,
+                                                in: modelContext
+                                            )
+                                    } label: {
+                                        Image(systemName: habit.isCompleted(on: .now) ? "checkmark.square.fill" : "square")
+                                            .foregroundStyle(habit.isCompleted(on: .now) ? .blue : .primary)
+                                            .font(.largeTitle)
+                                    }
+                                    Image(systemName: habit.icon).font(.largeTitle)
+                                    Text(habit.title).font(.title2)
+                                }
+                                .padding()
+                            }
                             Button(action: {isModalShown = true}){
                                 Image(systemName: "plus")
                                     .font(.title)
                                     .foregroundStyle(.primary)
                                 Text("Nuevo hábito")
                             }.buttonStyle(.plain)
-                            .padding(.vertical, 10)
-                            .padding(.trailing, 20)
-                            .padding(.leading)
-                            .background(.gray.opacity(0.2))
-                            .clipShape(Capsule())
-                            .padding(.horizontal, 20)
-                        
+                                .padding(.vertical, 10)
+                                .padding(.trailing, 20)
+                                .padding(.leading)
+                                .background(.gray.opacity(0.2))
+                                .clipShape(Capsule())
+                                .padding(.horizontal, 20)
+                            
+                        }
                     }
-                }
-                
             }
-            
             
         }
         //Modal
@@ -211,26 +231,36 @@ struct HabitView: View {
         let title = newHabitTitle.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !title.isEmpty else { return }
         
-        let repetitions = habitRepetitions
-            .map { $0.replacingOccurrences(of: ".circle", with: "") }
-            .joined(separator: ",")
+        let selectedDays: [Weekday] = habitRepetitions.compactMap { icon in
+                switch icon {
+                case "l.circle": return .monday
+                case "m.circle": return .tuesday
+                case "x.circle": return .wednesday
+                case "j.circle": return .thursday
+                case "v.circle": return .friday
+                case "s.circle": return .saturday
+                case "d.circle": return .sunday
+                default: return nil
+                }
+            }
+
+        guard !selectedDays.isEmpty else { return }
         
-        habits.append(
+        modelContext.insert(
             Habit(
                 title: title,
-                icon: newHabitIcon.isEmpty ? "star" : newHabitIcon, repetitions: repetitions
+                icon: newHabitIcon.isEmpty ? "star.fill" : newHabitIcon,
+                repetitionDays: selectedDays
             )
         )
         
         newHabitTitle = ""
         newHabitIcon = ""
         habitRepetitions = []
-        
-        
         isModalShown = false
     }
 }
 
 #Preview {
-    HabitView()
+    HabitView(isPortrait: true)
 }
