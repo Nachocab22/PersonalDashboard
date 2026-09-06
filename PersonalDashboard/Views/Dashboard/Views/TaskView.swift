@@ -17,12 +17,14 @@ struct TaskView: View {
     
     @State private var newTaskTitle = ""
     @FocusState private var isNewTaskFocused: Bool
+    private let day: Date
 
     init(
         day: Date = .now,
         calendar: Calendar = .autoupdatingCurrent
     ) {
         let startOfDay = calendar.startOfDay(for: day)
+        self.day = startOfDay
 
         let startOfNextDay = calendar.date(
             byAdding: .day,
@@ -104,7 +106,7 @@ struct TaskView: View {
         
         guard !title.isEmpty else { return }
         
-        modelContext.insert(TaskItem(title: title))
+        modelContext.insert(TaskItem(title: title, scheduledFor: day))
         newTaskTitle = ""
     }
     
@@ -180,7 +182,6 @@ struct TaskRow: View {
 
                         Button("Reprogramar") {
                             task.reschedule(to: dateSelected)
-                            task.postponementCount += 1
                             isCalendarShown = false
                         }
                         .buttonStyle(.borderedProminent)

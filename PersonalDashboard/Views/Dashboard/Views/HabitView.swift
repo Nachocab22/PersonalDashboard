@@ -17,34 +17,33 @@ struct HabitView: View {
     
     
     @Query(
-            filter: #Predicate<Habit> { habit in
-                habit.isActive &&
-                habit.createdAt < .now
-                //Intentar filtrar para que el habito no se muestre antes de la fecha de creacion
-            },
-            sort: \Habit.createdAt,
-            order: .reverse
-        )
-        private var activeHabits: [Habit]
+        filter: #Predicate<Habit> { habit in
+            habit.isActive
+        },
+        sort: \Habit.createdAt,
+        order: .reverse
+    )
+    private var activeHabits: [Habit]
 
-        private var todayHabits: [Habit] {
-            activeHabits.filter { habit in
-                habit.isScheduled(
-                    on: day,
-                    calendar: calendar
-                )
-            }
+    private var todayHabits: [Habit] {
+        activeHabits.filter { habit in
+            habit.createdAt < day &&
+            habit.isScheduled(
+                on: day,
+                calendar: calendar
+            )
         }
+    }
 
-        init(
-            isPortrait: Bool,
-            day: Date = .now,
-            calendar: Calendar = .autoupdatingCurrent
-        ) {
-            self.isPortrait = isPortrait
-            self.day = day
-            self.calendar = calendar
-        }
+    init(
+        isPortrait: Bool,
+        day: Date = .now,
+        calendar: Calendar = .autoupdatingCurrent
+    ) {
+        self.isPortrait = isPortrait
+        self.day = day
+        self.calendar = calendar
+    }
     
     ///Campos Form
     @State private var newHabitTitle: String = ""
