@@ -15,9 +15,12 @@ struct HabitView: View {
     private let day: Date
     private let calendar: Calendar
     
+    
     @Query(
             filter: #Predicate<Habit> { habit in
-                habit.isActive
+                habit.isActive &&
+                habit.createdAt < .now
+                //Intentar filtrar para que el habito no se muestre antes de la fecha de creacion
             },
             sort: \Habit.createdAt,
             order: .reverse
@@ -48,6 +51,10 @@ struct HabitView: View {
     @State private var newHabitIcon: String = ""
     @State private var habitRepetitions: [String] = []
     @State private var isModalShown: Bool = false
+    
+    //Campos ocultar archivo vertical
+    @State private var visibleArchiveHabitID: UUID?
+    @State private var archiveHideTask: Task<Void, Never>?
 
     let iconos: [String] = [
         "figure.strengthtraining.traditional",
@@ -96,21 +103,36 @@ struct HabitView: View {
                         HStack(alignment: .center, spacing: 10){
                             ForEach(todayHabits){ habit in
                                 HStack(spacing: 8) {
-                                    Image(systemName: habit.icon).font(.largeTitle)
+                                    Button{
+                                        showArchiveButton(for: habit)
+                                    } label: {
+                                        Image(systemName: habit.icon).font(.largeTitle)
+                                    }.buttonStyle(.plain)
+                                        .accessibilityLabel("Mostrar opción de archivar \(habit.title)")
+                                    
                                     Button{
                                         habit.toggleCompletion(
-                                                on: .now,
+                                                on: day,
                                                 in: modelContext
                                             )
                                     } label: {
-                                        Image(systemName: habit.isCompleted(on: .now) ? "checkmark.square.fill" : "square")
-                                            .foregroundStyle(habit.isCompleted(on: .now) ? .blue : .primary)
+                                        Image(systemName: habit.isCompleted(on: day) ? "checkmark.square.fill" : "square")
+                                            .foregroundStyle(habit.isCompleted(on: day) ? .blue : .primary)
                                             .font(.largeTitle)
                                     }
                                 }
                                 .padding()
                                 .background(.gray.opacity(0.2))
                                 .clipShape(Capsule())
+                                .overlay(alignment: .topLeading) {
+                                    if visibleArchiveHabitID == habit.id {
+                                        ArchiveUpperButton(habit: habit)
+                                            .offset(x: -8, y: -8)
+                                            .transition(
+                                                .scale.combined(with: .opacity)
+                                            )
+                                    }
+                                }
                             }
                             Button(action: {isModalShown = true}){
                                 Image(systemName: "plus")
@@ -121,44 +143,80 @@ struct HabitView: View {
                                     .clipShape(Capsule())
                             }.buttonStyle(.plain)
                         }.frame(maxWidth: .infinity, alignment: .center)
-                    }.padding(.horizontal, 20)
+                    }
+                    .scrollClipDisabled()
+                    .onDisappear {
+                        archiveHideTask?.cancel()
+                    }
+                    .padding(.horizontal, 20)
                 } else { ///Vista Horizontal
-                    ScrollView(.vertical, showsIndicators: false){
                         VStack(alignment: .leading, spacing: 10){
-                            ForEach(todayHabits){ habit in
-                                HStack(spacing: 8) {
-                                    Button{
-                                        habit.toggleCompletion(
-                                                on: .now,
-                                                in: modelContext
+                            List {
+                                ForEach(todayHabits) { habit in
+                                    HStack(spacing: 8) {
+                                        Button {
+                                            habit.toggleCompletion(
+                                                on: day,
+                                                in: modelContext,
+                                                calendar: calendar
                                             )
-                                    } label: {
-                                        Image(systemName: habit.isCompleted(on: .now) ? "checkmark.square.fill" : "square")
-                                            .foregroundStyle(habit.isCompleted(on: .now) ? .blue : .primary)
+                                        } label: {
+                                            Image(
+                                                systemName: habit.isCompleted(
+                                                    on: day,
+                                                    calendar: calendar
+                                                )
+                                                ? "checkmark.square.fill": "square"
+                                            )
+                                            .foregroundStyle(
+                                                habit.isCompleted(
+                                                    on: day,
+                                                    calendar: calendar
+                                                )
+                                                ? .blue: .primary
+                                            )
                                             .font(.largeTitle)
+                                        }
+                                        .buttonStyle(.plain)
+
+                                        Image(systemName: habit.icon)
+                                            .font(.largeTitle)
+
+                                        Text(habit.title)
+                                            .font(.title2)
                                     }
-                                    Image(systemName: habit.icon).font(.largeTitle)
-                                    Text(habit.title).font(.title2)
+                                    .padding(.vertical, 8)
+                                    .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                                        Button {
+                                            habit.isActive = false
+                                        } label: {
+                                            Label("Archivar", systemImage: "archivebox.fill")
+                                        }
+                                        .tint(.yellow)
+                                    }
+                                    .listRowSeparator(.hidden)
+                                    .listRowBackground(Color.clear)
                                 }
-                                .padding()
+                                Button(action: {isModalShown = true}){
+                                    Image(systemName: "plus")
+                                        .font(.title)
+                                        .foregroundStyle(.primary)
+                                    Text("Nuevo hábito")
+                                }.buttonStyle(.plain)
+                                    .padding(.vertical, 10)
+                                    .padding(.trailing, 20)
+                                    .padding(.leading)
+                                    .background(.gray.opacity(0.2))
+                                    .clipShape(Capsule())
+                                    .padding(.horizontal, 20)
+                                    .listRowSeparator(.hidden)
+                                    .listRowBackground(Color.clear)
                             }
-                            Button(action: {isModalShown = true}){
-                                Image(systemName: "plus")
-                                    .font(.title)
-                                    .foregroundStyle(.primary)
-                                Text("Nuevo hábito")
-                            }.buttonStyle(.plain)
-                                .padding(.vertical, 10)
-                                .padding(.trailing, 20)
-                                .padding(.leading)
-                                .background(.gray.opacity(0.2))
-                                .clipShape(Capsule())
-                                .padding(.horizontal, 20)
+                            .listStyle(.plain)
+                            .scrollContentBackground(.hidden)
                             
                         }
                     }
-            }
-            
         }
         //Modal
         .sheet(isPresented: $isModalShown) {
@@ -258,6 +316,53 @@ struct HabitView: View {
         newHabitIcon = ""
         habitRepetitions = []
         isModalShown = false
+    }
+    
+    private func showArchiveButton(for habit: Habit) {
+        // Cancela el temporizador anterior.
+        archiveHideTask?.cancel()
+
+        withAnimation(.snappy) {
+            visibleArchiveHabitID = habit.id
+        }
+
+        archiveHideTask = Task { @MainActor in
+            do {
+                try await Task.sleep(for: .seconds(3))
+            } catch {
+                // La tarea se canceló porque se tocó otro icono.
+                return
+            }
+
+            guard visibleArchiveHabitID == habit.id else {
+                return
+            }
+
+            withAnimation(.snappy) {
+                visibleArchiveHabitID = nil
+            }
+        }
+    }
+    
+}
+
+struct ArchiveUpperButton: View {
+    
+    @Bindable var habit: Habit
+    
+    var body: some View {
+        Button {
+            habit.isActive = false
+        } label: {
+            Image(systemName: "archivebox.fill")
+                .font(.system(size: 15, weight: .bold))
+                .foregroundStyle(.black)
+                .frame(width: 30, height: 30)
+                .background(.yellow, in: Circle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Archivar hábito")
+
     }
 }
 
