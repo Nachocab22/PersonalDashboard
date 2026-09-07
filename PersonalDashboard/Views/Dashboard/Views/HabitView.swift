@@ -24,7 +24,7 @@ struct HabitView: View {
         order: .reverse
     )
     private var activeHabits: [Habit]
-
+    @Query private var allHabits: [Habit]
     private var todayHabits: [Habit] {
         activeHabits.filter { habit in
             habit.createdAt < day &&
@@ -50,6 +50,11 @@ struct HabitView: View {
     @State private var newHabitIcon: String = ""
     @State private var habitRepetitions: [String] = []
     @State private var isModalShown: Bool = false
+    @State private var isAlertShown: Bool = false
+    
+    ///Campos Alert
+    @State private var duplicateMessage = ""
+    @State private var habitToUnarchive: Habit?
     
     //Campos ocultar archivo vertical
     @State private var visibleArchiveHabitID: UUID?
@@ -227,6 +232,7 @@ struct HabitView: View {
                     .padding(12)
                     .background(.gray.opacity(0.12))
                     .clipShape(RoundedRectangle(cornerRadius: 12))
+                    
 
                 Text("Icono")
                     .font(.title)
@@ -278,12 +284,37 @@ struct HabitView: View {
                 .buttonStyle(.borderedProminent)
             }
             .padding(20)
+            .alert("Posible hábito duplicado", isPresented: $isAlertShown) {
+                Button("Cancelar", role: .cancel) {
+                    habitToUnarchive = nil
+                }
+
+                if let habit = habitToUnarchive {
+                    Button("Desarchivar «\(habit.title)»") {
+                        habit.isActive = true
+
+                        newHabitTitle = ""
+                        newHabitIcon = ""
+                        habitRepetitions = []
+                        habitToUnarchive = nil
+                        isModalShown = false
+                    }
+                }
+
+                Button("Crear igualmente") {
+                    habitToUnarchive = nil
+                    createNewHabit(ignoreDuplicates: true)
+                }
+            } message: {
+                Text(duplicateMessage)
+            }
+            .presentationDetents([.height(350)])
             .presentationDetents([.height(350)])
         }
         .padding(.vertical, 20)
     }
     
-    private func createNewHabit() {
+    private func createNewHabit(ignoreDuplicates: Bool = false) {
         
         let title = newHabitTitle.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !title.isEmpty else { return }
@@ -302,6 +333,37 @@ struct HabitView: View {
             }
 
         guard !selectedDays.isEmpty else { return }
+        
+        if !ignoreDuplicates {
+            let matches = allHabits.filter {
+                areSimilar($0.title, title)
+            }
+            
+            habitToUnarchive = matches.first { !$0.isActive }
+
+            if !matches.isEmpty {
+                let details = matches.prefix(3).map { habit in
+                    let status = habit.isActive ? "activo" : "archivado"
+                    return "• \(habit.title) (\(status))"
+                }
+                .joined(separator: "\n")
+
+                let extra = matches.count > 3
+                    ? "\nY \(matches.count - 3) más."
+                    : ""
+
+                duplicateMessage = """
+                Ya tienes hábitos con títulos iguales o parecidos:
+
+                \(details)\(extra)
+
+                ¿Deseas crear el hábito igualmente?
+                """
+
+                isAlertShown = true
+                return
+            }
+        }
         
         modelContext.insert(
             Habit(
@@ -341,6 +403,50 @@ struct HabitView: View {
                 visibleArchiveHabitID = nil
             }
         }
+    }
+    
+    private func keywords(from title: String) -> Set<String> {
+        let normalized = title.folding(
+            options: [.caseInsensitive, .diacriticInsensitive],
+            locale: Locale(identifier: "es_ES")
+        )
+
+        let ignoredWords: Set<String> = [
+            "a", "al", "de", "del", "el", "la", "los", "las",
+            "un", "una", "unos", "unas", "y", "o",
+            "en", "con", "para", "por", "salir"
+        ]
+
+        let words = normalized
+            .split { !$0.isLetter && !$0.isNumber }
+            .map { String($0) }
+            .filter { !ignoredWords.contains($0) }
+
+        return Set(words)
+    }
+
+    private func areSimilar(_ first: String, _ second: String) -> Bool {
+        let trimmedFirst = first.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedSecond = second.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if trimmedFirst.compare(
+            trimmedSecond,
+            options: [.caseInsensitive, .diacriticInsensitive]
+        ) == .orderedSame {
+            return true
+        }
+
+        let firstWords = keywords(from: first)
+        let secondWords = keywords(from: second)
+
+        guard !firstWords.isEmpty, !secondWords.isEmpty else {
+            return false
+        }
+
+        let sharedWords = firstWords.intersection(secondWords).count
+        let smallerCount = min(firstWords.count, secondWords.count)
+
+        return Double(sharedWords) / Double(smallerCount) >= 0.75
     }
     
 }
