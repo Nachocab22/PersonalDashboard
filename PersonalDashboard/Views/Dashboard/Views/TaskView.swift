@@ -136,11 +136,13 @@ struct TaskRow: View {
                 Image(systemName: task.completedAt != nil ? "inset.filled.circle" : "circle").foregroundStyle(task.completedAt != nil ? task.isPriority ? .orange : .blue : .primary)
                     .font(.title2)
             }.buttonStyle(.plain)
-            TextField(task.title, text: $task.title)
+            TextField(task.title, text: $task.title, axis: .vertical)
                 .font(Font.system(size: 18))
                 .strikethrough(task.isCompleted)
+                .lineLimit(nil)
                 
-        }.swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                
+        }.swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button {
                 task.deletedAt = .now
             } label: {
