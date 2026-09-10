@@ -22,9 +22,18 @@ struct HabitView: View {
         },
         sort: \Habit.createdAt,
         order: .reverse
-    )
-    private var activeHabits: [Habit]
+    ) private var activeHabits: [Habit]
+    
+    @Query(
+        filter: #Predicate<Habit> { habit in
+            habit.isActive == false
+        },
+        sort: \Habit.createdAt,
+        order: .reverse
+    ) private var archivedHabits: [Habit]
+    
     @Query private var allHabits: [Habit]
+    
     private var todayHabits: [Habit] {
         activeHabits.filter { habit in
             habit.createdAt < day &&
@@ -45,12 +54,15 @@ struct HabitView: View {
         self.calendar = calendar
     }
     
-    ///Campos Form
+    ///Campos Form nuevo habito
     @State private var newHabitTitle: String = ""
     @State private var newHabitIcon: String = ""
     @State private var habitRepetitions: [String] = []
-    @State private var isModalShown: Bool = false
+    @State private var isNewHabitModalShown: Bool = false
     @State private var isAlertShown: Bool = false
+    
+    ///Campos Form detalle habitos
+    @State private var isDetailModalShown : Bool = false
     
     ///Campos Alert
     @State private var duplicateMessage = ""
@@ -95,12 +107,16 @@ struct HabitView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12){
-            HStack(alignment: .center, spacing: 8){
+            Button{
+                isDetailModalShown = true
+            } label: {
                 Text("Hábitos")
                     .font(Font.system(size: 30, weight: .semibold))
                 Image(systemName: "arrow.up.forward.square")
                     .font(.headline)
-            }.padding()
+            }
+            .padding()
+            .buttonStyle(.plain)
                 
                 if(isPortrait){ ///Vista vertical
                     ScrollView(.horizontal, showsIndicators: false){
@@ -138,7 +154,7 @@ struct HabitView: View {
                                     }
                                 }
                             }
-                            Button(action: {isModalShown = true}){
+                            Button(action: {isNewHabitModalShown = true}){
                                 Image(systemName: "plus")
                                     .font(.largeTitle)
                                     .foregroundStyle(.primary)
@@ -201,7 +217,7 @@ struct HabitView: View {
                                     .listRowSeparator(.hidden)
                                     .listRowBackground(Color.clear)
                                 }
-                                Button(action: {isModalShown = true}){
+                                Button(action: {isNewHabitModalShown = true}){
                                     Image(systemName: "plus")
                                         .font(.title)
                                         .foregroundStyle(.primary)
@@ -222,8 +238,8 @@ struct HabitView: View {
                         }
                     }
         }
-        //Modal
-        .sheet(isPresented: $isModalShown) {
+        //Modal nuevo hábito
+        .sheet(isPresented: $isNewHabitModalShown) {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Título")
                     .font(.title)
@@ -283,7 +299,9 @@ struct HabitView: View {
                 }
                 .buttonStyle(.borderedProminent)
             }
+            ///Fin Modal nuevo hábito
             .padding(20)
+            ///Alerta
             .alert("Posible hábito duplicado", isPresented: $isAlertShown) {
                 Button("Cancelar", role: .cancel) {
                     habitToUnarchive = nil
@@ -297,7 +315,7 @@ struct HabitView: View {
                         newHabitIcon = ""
                         habitRepetitions = []
                         habitToUnarchive = nil
-                        isModalShown = false
+                        isNewHabitModalShown = false
                     }
                 }
 
@@ -308,10 +326,31 @@ struct HabitView: View {
             } message: {
                 Text(duplicateMessage)
             }
+            ///Fin Alerta
             .presentationDetents([.height(350)])
             .presentationDetents([.height(350)])
+            
         }
         .padding(.vertical, 20)
+        ///Modal detalle hábitos
+        .sheet(isPresented: $isDetailModalShown, content: {
+            NavigationStack{
+                List{
+                    Section(header: Text("Activos")){
+                        ForEach(activeHabits) { activeHabit in
+                            HabitDetailElement(habit: activeHabit)
+                        }
+                    }
+                    Section(header: Text("Archivados")) {
+                        ForEach(archivedHabits) { archivedHabit in
+                            HabitDetailElement(habit: archivedHabit)
+                        }
+                    }
+                }.navigationTitle("Hábitos")
+            }
+            
+        })
+        ///Fin Modal detalle hábitos
     }
     
     private func createNewHabit(ignoreDuplicates: Bool = false) {
@@ -376,7 +415,7 @@ struct HabitView: View {
         newHabitTitle = ""
         newHabitIcon = ""
         habitRepetitions = []
-        isModalShown = false
+        isNewHabitModalShown = false
     }
     
     private func showArchiveButton(for habit: Habit) {
@@ -469,6 +508,22 @@ struct ArchiveUpperButton: View {
         .accessibilityLabel("Archivar hábito")
 
     }
+}
+
+struct HabitDetailElement: View {
+    
+    @Bindable var habit: Habit
+    
+    var body: some View {
+        HStack{
+            Image(systemName: habit.icon)
+                .font(.largeTitle)
+
+            Text(habit.title)
+                .font(.title2)
+        }
+    }
+    
 }
 
 #Preview {

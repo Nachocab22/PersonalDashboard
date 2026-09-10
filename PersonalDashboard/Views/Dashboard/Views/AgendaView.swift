@@ -137,11 +137,11 @@ struct AgendaView: View {
                     }
                 }.navigationTitle("Calendarios")
                     .toolbar {
-                                Button("Hecho") {
-                                    retrieveEvents()
-                                    isCalendarChooseShown = false
-                                }
-                            }
+                        Button("Hecho") {
+                            retrieveEvents()
+                            isCalendarChooseShown = false
+                        }
+                    }
             }
         })
     }
