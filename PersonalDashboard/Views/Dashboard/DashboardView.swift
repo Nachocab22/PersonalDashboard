@@ -26,7 +26,7 @@ struct DashboardView: View {
                     let habitWidth = geometry.size.width * 0.3
                     
                     HStack(alignment: .top) {
-                        AgendaView().frame(width: agendaWidth)
+                        AgendaView(day: selectedDay).frame(width: agendaWidth)
                         TaskView(day: selectedDay).frame(width: taskWidth)
                         HabitView(isPortrait: isPortrait, day: selectedDay).frame(width: habitWidth)
                     }.frame(width: geometry.size.width, height: geometry.size.height)
@@ -35,7 +35,7 @@ struct DashboardView: View {
             } else {
                 VStack() {
                     HStack {
-                        AgendaView()
+                        AgendaView(day: selectedDay)
                         TaskView(day: selectedDay)
                         
                     }

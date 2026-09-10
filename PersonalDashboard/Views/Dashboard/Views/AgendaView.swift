@@ -6,81 +6,222 @@
 //
 
 import SwiftUI
+import EventKitUI
 
 struct AgendaView: View {
     
-    struct Event : Identifiable {
-        let id: UUID = UUID()
-        let name: String?
-        let location: String?
-        let startDate: Date
-        let endDate: Date
-        let calendarColor: Color
-        let isAllDay: Bool
-        
-        init(id: UUID = UUID(), name: String? = "Nuevo evento", location: String? = nil, startDate: Date, endDate: Date, calendarColor: Color, isAllDay: Bool = false) {
-            self.name = name
-            self.location = location
-            self.startDate = startDate
-            self.endDate = endDate
-            self.calendarColor = calendarColor
-            self.isAllDay = isAllDay
+    @AppStorage("agenda.selectedCalendarIDs")
+    private var savedCalendarIDs: Data = Data()
+    
+    @State private var store: EKEventStore = EKEventStore()
+    var day: Date
+    
+    @State private var events : [EKEvent] = []
+    @State private var calendars : [EKCalendar] = []
+    @State private var calendarError : String?
+    @State private var isCalendarChooseShown : Bool = false
+    
+    @State private var refreshTrigger = 0
+    
+    private var selectedCalendarIDs: Set<String> {
+        get {
+            (try? JSONDecoder().decode(
+                Set<String>.self,
+                from: savedCalendarIDs
+            )) ?? []
+        }
+        nonmutating set {
+            guard let data = try? JSONEncoder().encode(newValue) else {
+                return
+            }
+
+            savedCalendarIDs = data
         }
     }
     
-    var events: [Event] = [
-        Event(name: "Peluquería", location: "Peluquería Rocío Nandez", startDate: Calendar.current.date(from: DateComponents(year: 2026, month: 6, day: 27, hour: 10, minute: 30))!, endDate: Calendar.current.date(from: DateComponents(year: 2026, month: 6, day: 27, hour: 11, minute: 0))!, calendarColor: .yellow),
-        Event(name: "Review Skills", location: "Edificio Realia, 9", startDate: Calendar.current.date(from: DateComponents(year: 2026, month: 6, day: 27, hour: 12, minute: 30))!, endDate: Calendar.current.date(from: DateComponents(year: 2026, month: 6, day: 27, hour: 13, minute: 30))!, calendarColor: .purple),
-        Event(name: "Daily", startDate: Calendar.current.date(from: DateComponents(year: 2026, month: 6, day: 27, hour: 9, minute: 30))!, endDate: Calendar.current.date(from: DateComponents(year: 2026, month: 6, day: 27, hour: 9, minute: 45))!, calendarColor: .purple),
-        Event(name: "Hacer declaración de la Rentas", startDate: Calendar.current.date(from: DateComponents(year: 2026, month: 6, day: 27))!, endDate: Calendar.current.date(from: DateComponents(year: 2026, month: 6, day: 27))!, calendarColor: .purple, isAllDay: true)
-    ]
-    
     var body: some View {
         VStack(alignment: .leading){
-            Text("Agenda")
-                .font(Font.system(size: 30, weight: .semibold))
-                .padding()
-            List {
-                Section {
-                    ForEach(events.filter { $0.isAllDay }) { event in
-                        EventRow(event: event)
-                            .listRowSeparator(.hidden)
-                            .listRowInsets(EdgeInsets(top: 5, leading: 10, bottom: 5, trailing: 10))
+            HStack{
+                Button{
+                    refreshTrigger += 1
+                    retrieveEvents()
+                } label: {
+                    Text("Agenda")
+                        .font(Font.system(size: 30, weight: .bold))
+                        .padding()
+                    
+                    Image(systemName: "arrow.clockwise")
+                        .font(Font.system(size: 20, weight: .semibold))
+                        .padding(EdgeInsets(top: 0, leading: -15, bottom: -2, trailing: 0))
+                        .symbolEffect(
+                            .rotate.clockwise,
+                            options: .nonRepeating.speed(5),
+                            value: refreshTrigger
+                        )
+                }.buttonStyle(.plain)
+                Spacer()
+                Button{
+                    Task {
+                       await openCalendarChooser()
                     }
-                }
-                Section {
-                    Rectangle()
-                        .opacity(0.2)
-                        .frame(height: 2)
-                        .cornerRadius(10)
-                    ForEach(events
-                            .filter { !$0.isAllDay }
-                            .sorted { $0.startDate < $1.startDate }
-                    ) { event in
-                        EventRow(event: event)
-                            .listRowSeparator(.hidden)
-                            .listRowInsets(EdgeInsets(top: 5, leading: 10, bottom: 5, trailing: 10))
-                    }
-                }
+                } label: {
+                    Image(systemName: "calendar.badge.checkmark")
+                }.buttonStyle(.glassProminent)
             }
-            .listStyle(.plain)
+            selectedCalendarIDs.isEmpty ? Text("Selecciona los calendarios que mostrar").padding() : nil
+            if calendarError != nil {
+                Text(calendarError ?? "Selecciona los calendarios que mostrar")
+                    .font(Font.system(size: 30, weight: .semibold))
+                    .foregroundStyle(.red)
+                    .padding()
+            } else {
+                events.isEmpty ? Text("No hay eventos programados").padding().foregroundStyle(.gray) : nil
+                List {
+                    let allDayEvents = events.filter { $0.isAllDay }
+                    Section {
+                        ForEach(allDayEvents, id: \.self) { event in
+                            EventRow(event: event)
+                                .listRowSeparator(.hidden)
+                                .listRowInsets(EdgeInsets(top: 5, leading: 10, bottom: 5, trailing: 10))
+                        }
+                    }
+                    Section {
+                        !allDayEvents.isEmpty ? Rectangle()
+                                .opacity(0.2)
+                                .frame(height: 2)
+                            .cornerRadius(10) : nil
+                        ForEach(events
+                            .filter { !$0.isAllDay }
+                            .sorted { $0.startDate < $1.startDate },
+                            id: \.self
+                        ) { event in
+                            EventRow(event: event)
+                                .listRowSeparator(.hidden)
+                                .listRowInsets(EdgeInsets(top: 5, leading: 10, bottom: 5, trailing: 10))
+                        }
+                    }
+                }
+                .listStyle(.plain)
+            }
         }
+        .task { loadAgenda() }
+        .onChange(of: day){ retrieveEvents() }
+        .sheet(isPresented: $isCalendarChooseShown, content: {
+            NavigationStack{
+                List(calendars, id: \.calendarIdentifier){ calendar in
+                    Toggle(isOn: Binding(
+                        get: {
+                            selectedCalendarIDs.contains(calendar.calendarIdentifier)
+                        },
+                        set: { isSelected in
+                            if isSelected {
+                                selectedCalendarIDs.insert(calendar.calendarIdentifier)
+                            } else {
+                                selectedCalendarIDs.remove(calendar.calendarIdentifier)
+                            }
+                        }
+                    )) {
+                        HStack {
+                            Circle()
+                                .fill(Color(cgColor: calendar.cgColor))
+                                .frame(width: 12, height: 12)
+
+                            VStack(alignment: .leading) {
+                                Text(calendar.title)
+
+                                Text(calendar.source.title)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                }.navigationTitle("Calendarios")
+                    .toolbar {
+                                Button("Hecho") {
+                                    retrieveEvents()
+                                    isCalendarChooseShown = false
+                                }
+                            }
+            }
+        })
+    }
+    
+    @MainActor
+    private func loadAgenda() {
+        guard EKEventStore.authorizationStatus(for: .event) == .fullAccess else {
+            calendars = []
+            events = []
+            return
+        }
+
+        calendars = store.calendars(for: .event)
+        retrieveEvents()
+    }
+    
+    @MainActor
+    private func openCalendarChooser() async {
+        
+        do {
+            guard try await store.requestFullAccessToEvents() else {
+                calendarError = "No has permitido el acceso al calendario."
+                return
+            }
+
+            calendars = store.calendars(for: .event)
+            calendarError = nil
+            isCalendarChooseShown = true
+        } catch {
+            calendarError = error.localizedDescription
+        }
+    }
+    
+    @MainActor
+    private func retrieveEvents() {
+            
+        let selectedCalendars = calendars.filter {
+            selectedCalendarIDs.contains($0.calendarIdentifier)
+        }
+        
+        guard !selectedCalendars.isEmpty else {
+            events = []
+            calendarError = nil
+            return
+        }
+
+        let start = Calendar.current.startOfDay(for: day)
+        guard let end = Calendar.current.date(
+            byAdding: .day,
+            value: 1,
+            to: start
+        ) else { return }
+
+        let predicate = store.predicateForEvents(
+            withStart: start,
+            end: end,
+            calendars: selectedCalendars
+        )
+
+        events = store.events(matching: predicate)
+            .sorted { $0.startDate < $1.startDate }
+
+        calendarError = nil
+        
     }
 }
     
 #Preview {
-    AgendaView()
+    AgendaView(day: .now)
 }
 
 struct EventRow: View {
     
-    var event: AgendaView.Event
+    let event: EKEvent
     
     var body: some View {
         if(event.isAllDay){
             HStack(alignment: .top){
                 VStack(alignment: .leading, spacing: 6){
-                    Text(event.name ?? "Nuevo evento")
+                    Text(event.title ?? "Nuevo evento")
                         .font(Font.system(size: 18, weight: .bold))
                     event.location != nil ?
                     HStack{
@@ -91,13 +232,13 @@ struct EventRow: View {
                 if(event.location == nil){
                     ZStack {
                         Circle()
-                            .fill(event.calendarColor)
+                            .fill(Color(cgColor: event.calendar.cgColor))
                             .frame(width: 15)
                     }.frame(maxHeight: .infinity, alignment: .center)
                     
                 } else {
                     Rectangle()
-                        .fill(event.calendarColor)
+                        .fill(Color(cgColor: event.calendar.cgColor))
                         .frame(width: 8)
                         .cornerRadius(10)
                 }
@@ -110,19 +251,23 @@ struct EventRow: View {
         } else {
             HStack(alignment: .top){
                 VStack(alignment: .leading, spacing: 6){
-                    Text(event.name ?? "Nuevo evento")
-                        .font(Font.system(size: 18, weight: .bold))
+                    HStack{
+                        event.hasAlarms ? Image(systemName: "bell.fill").foregroundStyle(.yellow) : nil
+                        Text(event.title ?? "Nuevo evento")
+                            .font(Font.system(size: 18, weight: .bold))
+                    }
+                    event.location != nil ?
                     HStack{
                         Image(systemName: "location.circle")
                         event.location != nil ? Text(event.location ?? "Sin información") : Text("Sin ubicación").foregroundStyle(Color.gray)
-                    }
+                    } : nil
                     HStack{
                         Image(systemName: "clock")
                         Text("\(event.startDate.formatted(date: .omitted, time: .shortened)) - \(event.endDate.formatted(date: .omitted, time: .shortened))")
                     }
                 }.frame(maxWidth: .greatestFiniteMagnitude, alignment: .leading)
                 Rectangle()
-                    .fill(event.calendarColor)
+                    .fill(Color(cgColor: event.calendar.cgColor))
                     .frame(width: 8)
                     .cornerRadius(10)
                 
