@@ -42,23 +42,9 @@ struct AgendaView: View {
     var body: some View {
         VStack(alignment: .leading){
             HStack{
-                Button{
-                    refreshTrigger += 1
-                    retrieveEvents()
-                } label: {
-                    Text("Agenda")
-                        .font(Font.system(size: 30, weight: .bold))
-                        .padding()
-                    
-                    Image(systemName: "arrow.clockwise")
-                        .font(Font.system(size: 20, weight: .semibold))
-                        .padding(EdgeInsets(top: 0, leading: -15, bottom: -2, trailing: 0))
-                        .symbolEffect(
-                            .rotate.clockwise,
-                            options: .nonRepeating.speed(5),
-                            value: refreshTrigger
-                        )
-                }.buttonStyle(.plain)
+                Text("Agenda")
+                    .font(Font.system(size: 30, weight: .bold))
+                    .padding()
                 Spacer()
                 Button{
                     Task {
@@ -69,14 +55,23 @@ struct AgendaView: View {
                 }.buttonStyle(.glassProminent)
                     .padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20))
             }
-            selectedCalendarIDs.isEmpty ? Text("Selecciona los calendarios que mostrar").padding() : nil
+            if(selectedCalendarIDs.isEmpty){
+                HStack{
+                    Text("Selecciona los calendarios que mostrar")
+                    Image(systemName: "arrow.turn.right.up")
+                }
+                .padding()
+                .foregroundStyle(.gray)
+                
+            }
+            else { EmptyView() }
             if calendarError != nil {
                 Text(calendarError ?? "Selecciona los calendarios que mostrar")
                     .font(Font.system(size: 30, weight: .semibold))
                     .foregroundStyle(.red)
                     .padding()
             } else {
-                events.isEmpty ? Text("No hay eventos programados").padding().foregroundStyle(.gray) : nil
+                events.isEmpty && !selectedCalendarIDs.isEmpty ? Text("No hay eventos programados").padding().foregroundStyle(.gray) : nil
                 List {
                     let allDayEvents = events.filter { $0.isAllDay }
                     Section {
@@ -103,6 +98,12 @@ struct AgendaView: View {
                     }
                 }
                 .listStyle(.plain)
+                .refreshable{
+                    await MainActor.run {
+                        refreshTrigger += 1
+                        loadAgenda()
+                    }
+                }
             }
         }
         .task { loadAgenda() }
