@@ -59,6 +59,7 @@ struct HabitView: View {
     @State private var newHabitIcon: String = ""
     @State private var habitRepetitions: [String] = []
     @State private var isNewHabitModalShown: Bool = false
+    @State private var habitBeingEdited: Habit?
     @State private var isAlertShown: Bool = false
     
     ///Campos Form detalle habitos
@@ -239,66 +240,17 @@ struct HabitView: View {
                     }
         }
         //Modal nuevo hábito
-        .sheet(isPresented: $isNewHabitModalShown) {
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Título")
-                    .font(.title)
-
-                TextField("Introduce el hábito", text: $newHabitTitle)
-                    .padding(12)
-                    .background(.gray.opacity(0.12))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    
-
-                Text("Icono")
-                    .font(.title)
-
-                LazyVGrid(columns: columns, spacing: 10) {
-                    ForEach(iconos, id: \.self) { icono in
-                        Button {
-                            newHabitIcon = icono
-                        } label: {
-                            Image(systemName: icono)
-                                .font(.title)
-                                .foregroundStyle(newHabitIcon == icono ? .blue : .primary)
-                                .frame(width: 50, height: 50)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 30)
-                                        .fill(newHabitIcon == icono ? .blue.opacity(0.15) : .gray.opacity(0.12))
-                                )
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-
-                Text("Repeticiones")
-                    .font(.title)
-
-                HStack(spacing: 20) {
-                    ForEach(weekIcons, id: \.self) { weekDayIcon in
-                        Button {
-                            if habitRepetitions.contains(weekDayIcon) {
-                                habitRepetitions.removeAll { $0 == weekDayIcon }
-                            } else {
-                                habitRepetitions.append(weekDayIcon)
-                            }
-                        } label: {
-                            Image(systemName: habitRepetitions.contains(weekDayIcon) ? weekDayIcon + ".fill" : weekDayIcon)
-                                .font(.largeTitle)
-                                .foregroundStyle(habitRepetitions.contains(weekDayIcon) ? .blue : .primary)
-                        }
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                Spacer()
-                Button {
-                    createNewHabit()
-                } label: {
-                    Text("Crear hábito")
-                        .frame(maxWidth: .infinity, minHeight: 44)
-                }
-                .buttonStyle(.borderedProminent)
-            }
+        .sheet(isPresented: $isNewHabitModalShown, onDismiss: resetHabitForm) {
+            HabitFormView(
+                newHabitTitle: $newHabitTitle,
+                newHabitIcon: $newHabitIcon,
+                habitRepetitions: $habitRepetitions,
+                isEditing: habitBeingEdited != nil,
+                iconos: iconos,
+                weekIcons: weekIcons,
+                columns: columns,
+                onSave: { createNewHabit() }
+            )
             ///Fin Modal nuevo hábito
             .padding(20)
             ///Alerta
@@ -327,26 +279,72 @@ struct HabitView: View {
                 Text(duplicateMessage)
             }
             ///Fin Alerta
-            .presentationDetents([.height(350)])
-            .presentationDetents([.height(350)])
+            .presentationDetents([.large])
             
         }
         .padding(.vertical, 20)
         ///Modal detalle hábitos
-        .sheet(isPresented: $isDetailModalShown, content: {
+        .sheet(isPresented: $isDetailModalShown, onDismiss: {
+            // Espera a que se cierre el detalle antes de abrir el formulario.
+            if habitBeingEdited != nil {
+                isNewHabitModalShown = true
+            }
+        }, content: {
             NavigationStack{
                 List{
                     Section(header: Text("Activos")){
+                        activeHabits.isEmpty ? Text("No tienes ningún hábito activo").foregroundColor(.secondary) : nil
                         ForEach(activeHabits) { activeHabit in
                             HabitDetailElement(habit: activeHabit)
+                                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                    Button {
+                                        modifyHabit(habit: activeHabit)
+                                    } label: {
+                                        Label("Modificar", systemImage: "pencil.line")
+                                    }
+                                    .tint(.orange)
+                                }
+                                .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                                    Button {
+                                        activeHabit.isActive = false
+                                    } label: {
+                                        Label("Archivar", systemImage: "archivebox.fill")
+                                    }
+                                    .tint(.yellow)
+                                }
                         }
                     }
                     Section(header: Text("Archivados")) {
+                        archivedHabits.isEmpty ? Text("No tienes ningún hábito archivado").foregroundColor(.secondary) : nil
                         ForEach(archivedHabits) { archivedHabit in
                             HabitDetailElement(habit: archivedHabit)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                Button {
+                                    modelContext.delete(archivedHabit)
+                                } label: {
+                                    Label("Eliminar", systemImage: "trash.fill")
+                                }
+                                .tint(.red)
+                                Button {
+                                    modifyHabit(habit: archivedHabit)
+                                } label: {
+                                    Label("Modificar", systemImage: "pencil.line")
+                                }
+                                .tint(.orange)
+                            }
+                            .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                                Button {
+                                    archivedHabit.isActive = true
+                                } label: {
+                                    Label("Activar", systemImage: "arrow.up.circle.fill")
+                                }
+                                .tint(.green)
+                            }
                         }
                     }
-                }.navigationTitle("Hábitos")
+                }
+                .navigationTitle("Hábitos")
+                
             }
             
         })
@@ -372,6 +370,14 @@ struct HabitView: View {
             }
 
         guard !selectedDays.isEmpty else { return }
+
+        if let habit = habitBeingEdited {
+            habit.title = title
+            habit.icon = newHabitIcon.isEmpty ? "star.fill" : newHabitIcon
+            habit.repetitionDays = selectedDays
+            isNewHabitModalShown = false
+            return
+        }
         
         if !ignoreDuplicates {
             let matches = allHabits.filter {
@@ -418,8 +424,40 @@ struct HabitView: View {
         isNewHabitModalShown = false
     }
     
+    private func modifyHabit(habit: Habit) {
+        habitBeingEdited = habit
+        newHabitTitle = habit.title
+        newHabitIcon = habit.icon
+        habitRepetitions = habit.repetitionDays.map { day in
+            switch day {
+            case .monday: return "l.circle"
+            case .tuesday: return "m.circle"
+            case .wednesday: return "x.circle"
+            case .thursday: return "j.circle"
+            case .friday: return "v.circle"
+            case .saturday: return "s.circle"
+            case .sunday: return "d.circle"
+            }
+        }
+
+        if isDetailModalShown {
+            isDetailModalShown = false
+        } else {
+            isNewHabitModalShown = true
+        }
+    }
+
+    private func resetHabitForm() {
+        habitBeingEdited = nil
+        newHabitTitle = ""
+        newHabitIcon = ""
+        habitRepetitions = []
+        habitToUnarchive = nil
+        duplicateMessage = ""
+        isAlertShown = false
+    }
+
     private func showArchiveButton(for habit: Habit) {
-        // Cancela el temporizador anterior.
         archiveHideTask?.cancel()
 
         withAnimation(.snappy) {
@@ -488,6 +526,88 @@ struct HabitView: View {
         return Double(sharedWords) / Double(smallerCount) >= 0.75
     }
     
+}
+
+
+private struct HabitFormView: View {
+    @Binding var newHabitTitle: String
+    @Binding var newHabitIcon: String
+    @Binding var habitRepetitions: [String]
+    let isEditing: Bool
+    let iconos: [String]
+    let weekIcons: [String]
+    let columns: [GridItem]
+    let onSave: () -> Void
+
+    // Incluye también los iconos guardados que no estén en el catálogo actual.
+    private var availableIcons: [String] {
+        guard !newHabitIcon.isEmpty, !iconos.contains(newHabitIcon) else {
+            return iconos
+        }
+        return iconos + [newHabitIcon]
+    }
+
+    var body: some View {
+            VStack(alignment: .leading, spacing: 16) {
+                Text("Título")
+                    .font(.title)
+
+                TextField("Introduce el hábito", text: $newHabitTitle)
+                    .padding(12)
+                    .background(.gray.opacity(0.12))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    
+
+                Text("Icono")
+                    .font(.title)
+
+                LazyVGrid(columns: columns, spacing: 10) {
+                    ForEach(availableIcons, id: \.self) { icono in
+                        Button {
+                            newHabitIcon = icono
+                        } label: {
+                            Image(systemName: icono)
+                                .font(.title)
+                                .foregroundStyle(newHabitIcon == icono ? .blue : .primary)
+                                .frame(width: 50, height: 50)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 30)
+                                        .fill(newHabitIcon == icono ? .blue.opacity(0.15) : .gray.opacity(0.12))
+                                )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+
+                Text("Repeticiones")
+                    .font(.title)
+
+                HStack(spacing: 20) {
+                    ForEach(weekIcons, id: \.self) { weekDayIcon in
+                        Button {
+                            if habitRepetitions.contains(weekDayIcon) {
+                                habitRepetitions.removeAll { $0 == weekDayIcon }
+                            } else {
+                                habitRepetitions.append(weekDayIcon)
+                            }
+                        } label: {
+                            Image(systemName: habitRepetitions.contains(weekDayIcon) ? weekDayIcon + ".fill" : weekDayIcon)
+                                .font(.largeTitle)
+                                .foregroundStyle(habitRepetitions.contains(weekDayIcon) ? .blue : .primary)
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                Spacer()
+                Button {
+                    onSave()
+                } label: {
+                    Text(!isEditing ? "Crear hábito" : "Guardar cambios")
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                }
+                .buttonStyle(.borderedProminent)
+            }
+    }
 }
 
 struct ArchiveUpperButton: View {
