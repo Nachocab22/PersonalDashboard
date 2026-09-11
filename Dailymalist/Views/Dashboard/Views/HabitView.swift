@@ -1,6 +1,6 @@
 //
 //  HabitView.swift
-//  PersonalDashboard
+//  Dailymalist
 //
 //  Created by Nachete on 27/06/2026.
 //

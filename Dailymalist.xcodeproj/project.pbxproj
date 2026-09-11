@@ -24,38 +24,38 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		E16054422FE6DE9300C66ED9 /* PersonalDashboard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PersonalDashboard.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		E16054512FE6DE9400C66ED9 /* PersonalDashboardTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PersonalDashboardTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		E160545B2FE6DE9400C66ED9 /* PersonalDashboardUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PersonalDashboardUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E16054422FE6DE9300C66ED9 /* Dailymalist.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Dailymalist.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E16054512FE6DE9400C66ED9 /* DailymalistTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DailymalistTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E160545B2FE6DE9400C66ED9 /* DailymalistUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DailymalistUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		E14E2742305294D900014208 /* Exceptions for "PersonalDashboard" folder in "PersonalDashboard" target */ = {
+		E14E2742305294D900014208 /* Exceptions for "Dailymalist" folder in "Dailymalist" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = E16054412FE6DE9300C66ED9 /* PersonalDashboard */;
+			target = E16054412FE6DE9300C66ED9 /* Dailymalist */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		E16054442FE6DE9300C66ED9 /* PersonalDashboard */ = {
+		E16054442FE6DE9300C66ED9 /* Dailymalist */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				E14E2742305294D900014208 /* Exceptions for "PersonalDashboard" folder in "PersonalDashboard" target */,
+				E14E2742305294D900014208 /* Exceptions for "Dailymalist" folder in "Dailymalist" target */,
 			);
-			path = PersonalDashboard;
+			path = Dailymalist;
 			sourceTree = "<group>";
 		};
-		E16054542FE6DE9400C66ED9 /* PersonalDashboardTests */ = {
+		E16054542FE6DE9400C66ED9 /* DailymalistTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = PersonalDashboardTests;
+			path = DailymalistTests;
 			sourceTree = "<group>";
 		};
-		E160545E2FE6DE9400C66ED9 /* PersonalDashboardUITests */ = {
+		E160545E2FE6DE9400C66ED9 /* DailymalistUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = PersonalDashboardUITests;
+			path = DailymalistUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -88,9 +88,9 @@
 		E16054392FE6DE9300C66ED9 = {
 			isa = PBXGroup;
 			children = (
-				E16054442FE6DE9300C66ED9 /* PersonalDashboard */,
-				E16054542FE6DE9400C66ED9 /* PersonalDashboardTests */,
-				E160545E2FE6DE9400C66ED9 /* PersonalDashboardUITests */,
+				E16054442FE6DE9300C66ED9 /* Dailymalist */,
+				E16054542FE6DE9400C66ED9 /* DailymalistTests */,
+				E160545E2FE6DE9400C66ED9 /* DailymalistUITests */,
 				E16054432FE6DE9300C66ED9 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -98,9 +98,9 @@
 		E16054432FE6DE9300C66ED9 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				E16054422FE6DE9300C66ED9 /* PersonalDashboard.app */,
-				E16054512FE6DE9400C66ED9 /* PersonalDashboardTests.xctest */,
-				E160545B2FE6DE9400C66ED9 /* PersonalDashboardUITests.xctest */,
+				E16054422FE6DE9300C66ED9 /* Dailymalist.app */,
+				E16054512FE6DE9400C66ED9 /* DailymalistTests.xctest */,
+				E160545B2FE6DE9400C66ED9 /* DailymalistUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -108,9 +108,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		E16054412FE6DE9300C66ED9 /* PersonalDashboard */ = {
+		E16054412FE6DE9300C66ED9 /* Dailymalist */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = E16054652FE6DE9400C66ED9 /* Build configuration list for PBXNativeTarget "PersonalDashboard" */;
+			buildConfigurationList = E16054652FE6DE9400C66ED9 /* Build configuration list for PBXNativeTarget "Dailymalist" */;
 			buildPhases = (
 				E160543E2FE6DE9300C66ED9 /* Sources */,
 				E160543F2FE6DE9300C66ED9 /* Frameworks */,
@@ -121,18 +121,18 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				E16054442FE6DE9300C66ED9 /* PersonalDashboard */,
+				E16054442FE6DE9300C66ED9 /* Dailymalist */,
 			);
-			name = PersonalDashboard;
+			name = Dailymalist;
 			packageProductDependencies = (
 			);
 			productName = PersonalDashboard;
-			productReference = E16054422FE6DE9300C66ED9 /* PersonalDashboard.app */;
+			productReference = E16054422FE6DE9300C66ED9 /* Dailymalist.app */;
 			productType = "com.apple.product-type.application";
 		};
-		E16054502FE6DE9400C66ED9 /* PersonalDashboardTests */ = {
+		E16054502FE6DE9400C66ED9 /* DailymalistTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = E16054682FE6DE9400C66ED9 /* Build configuration list for PBXNativeTarget "PersonalDashboardTests" */;
+			buildConfigurationList = E16054682FE6DE9400C66ED9 /* Build configuration list for PBXNativeTarget "DailymalistTests" */;
 			buildPhases = (
 				E160544D2FE6DE9400C66ED9 /* Sources */,
 				E160544E2FE6DE9400C66ED9 /* Frameworks */,
@@ -144,18 +144,18 @@
 				E16054532FE6DE9400C66ED9 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				E16054542FE6DE9400C66ED9 /* PersonalDashboardTests */,
+				E16054542FE6DE9400C66ED9 /* DailymalistTests */,
 			);
-			name = PersonalDashboardTests;
+			name = DailymalistTests;
 			packageProductDependencies = (
 			);
 			productName = PersonalDashboardTests;
-			productReference = E16054512FE6DE9400C66ED9 /* PersonalDashboardTests.xctest */;
+			productReference = E16054512FE6DE9400C66ED9 /* DailymalistTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		E160545A2FE6DE9400C66ED9 /* PersonalDashboardUITests */ = {
+		E160545A2FE6DE9400C66ED9 /* DailymalistUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = E160546B2FE6DE9400C66ED9 /* Build configuration list for PBXNativeTarget "PersonalDashboardUITests" */;
+			buildConfigurationList = E160546B2FE6DE9400C66ED9 /* Build configuration list for PBXNativeTarget "DailymalistUITests" */;
 			buildPhases = (
 				E16054572FE6DE9400C66ED9 /* Sources */,
 				E16054582FE6DE9400C66ED9 /* Frameworks */,
@@ -167,13 +167,13 @@
 				E160545D2FE6DE9400C66ED9 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				E160545E2FE6DE9400C66ED9 /* PersonalDashboardUITests */,
+				E160545E2FE6DE9400C66ED9 /* DailymalistUITests */,
 			);
-			name = PersonalDashboardUITests;
+			name = DailymalistUITests;
 			packageProductDependencies = (
 			);
 			productName = PersonalDashboardUITests;
-			productReference = E160545B2FE6DE9400C66ED9 /* PersonalDashboardUITests.xctest */;
+			productReference = E160545B2FE6DE9400C66ED9 /* DailymalistUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -199,7 +199,7 @@
 					};
 				};
 			};
-			buildConfigurationList = E160543D2FE6DE9300C66ED9 /* Build configuration list for PBXProject "PersonalDashboard" */;
+			buildConfigurationList = E160543D2FE6DE9300C66ED9 /* Build configuration list for PBXProject "Dailymalist" */;
 			developmentRegion = es;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -214,9 +214,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				E16054412FE6DE9300C66ED9 /* PersonalDashboard */,
-				E16054502FE6DE9400C66ED9 /* PersonalDashboardTests */,
-				E160545A2FE6DE9400C66ED9 /* PersonalDashboardUITests */,
+				E16054412FE6DE9300C66ED9 /* Dailymalist */,
+				E16054502FE6DE9400C66ED9 /* DailymalistTests */,
+				E160545A2FE6DE9400C66ED9 /* DailymalistUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -272,12 +272,12 @@
 /* Begin PBXTargetDependency section */
 		E16054532FE6DE9400C66ED9 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = E16054412FE6DE9300C66ED9 /* PersonalDashboard */;
+			target = E16054412FE6DE9300C66ED9 /* Dailymalist */;
 			targetProxy = E16054522FE6DE9400C66ED9 /* PBXContainerItemProxy */;
 		};
 		E160545D2FE6DE9400C66ED9 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = E16054412FE6DE9300C66ED9 /* PersonalDashboard */;
+			target = E16054412FE6DE9300C66ED9 /* Dailymalist */;
 			targetProxy = E160545C2FE6DE9400C66ED9 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -419,7 +419,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = PersonalDashboard/Info.plist;
+				INFOPLIST_FILE = Dailymalist/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Dailymalist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Mostrar los eventos de los calendarios que selecciones en tu agenda.";
@@ -468,7 +468,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = PersonalDashboard/Info.plist;
+				INFOPLIST_FILE = Dailymalist/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Dailymalist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Mostrar los eventos de los calendarios que selecciones en tu agenda.";
@@ -525,7 +525,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PersonalDashboard.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PersonalDashboard";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Dailymalist.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Dailymalist";
 				XROS_DEPLOYMENT_TARGET = 26.5;
 			};
 			name = Debug;
@@ -552,7 +552,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PersonalDashboard.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PersonalDashboard";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Dailymalist.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Dailymalist";
 				XROS_DEPLOYMENT_TARGET = 26.5;
 			};
 			name = Release;
@@ -612,7 +612,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		E160543D2FE6DE9300C66ED9 /* Build configuration list for PBXProject "PersonalDashboard" */ = {
+		E160543D2FE6DE9300C66ED9 /* Build configuration list for PBXProject "Dailymalist" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				E16054632FE6DE9400C66ED9 /* Debug */,
@@ -621,7 +621,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		E16054652FE6DE9400C66ED9 /* Build configuration list for PBXNativeTarget "PersonalDashboard" */ = {
+		E16054652FE6DE9400C66ED9 /* Build configuration list for PBXNativeTarget "Dailymalist" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				E16054662FE6DE9400C66ED9 /* Debug */,
@@ -630,7 +630,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		E16054682FE6DE9400C66ED9 /* Build configuration list for PBXNativeTarget "PersonalDashboardTests" */ = {
+		E16054682FE6DE9400C66ED9 /* Build configuration list for PBXNativeTarget "DailymalistTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				E16054692FE6DE9400C66ED9 /* Debug */,
@@ -639,7 +639,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		E160546B2FE6DE9400C66ED9 /* Build configuration list for PBXNativeTarget "PersonalDashboardUITests" */ = {
+		E160546B2FE6DE9400C66ED9 /* Build configuration list for PBXNativeTarget "DailymalistUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				E160546C2FE6DE9400C66ED9 /* Debug */,

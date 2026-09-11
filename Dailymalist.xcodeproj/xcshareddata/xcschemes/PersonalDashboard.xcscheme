@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "E16054412FE6DE9300C66ED9"
-               BuildableName = "PersonalDashboard.app"
-               BlueprintName = "PersonalDashboard"
-               ReferencedContainer = "container:PersonalDashboard.xcodeproj">
+               BuildableName = "Dailymalist.app"
+               BlueprintName = "Dailymalist"
+               ReferencedContainer = "container:Dailymalist.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -36,9 +36,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "E16054502FE6DE9400C66ED9"
-               BuildableName = "PersonalDashboardTests.xctest"
-               BlueprintName = "PersonalDashboardTests"
-               ReferencedContainer = "container:PersonalDashboard.xcodeproj">
+               BuildableName = "DailymalistTests.xctest"
+               BlueprintName = "DailymalistTests"
+               ReferencedContainer = "container:Dailymalist.xcodeproj">
             </BuildableReference>
          </TestableReference>
          <TestableReference
@@ -47,9 +47,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "E160545A2FE6DE9400C66ED9"
-               BuildableName = "PersonalDashboardUITests.xctest"
-               BlueprintName = "PersonalDashboardUITests"
-               ReferencedContainer = "container:PersonalDashboard.xcodeproj">
+               BuildableName = "DailymalistUITests.xctest"
+               BlueprintName = "DailymalistUITests"
+               ReferencedContainer = "container:Dailymalist.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -70,9 +70,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "E16054412FE6DE9300C66ED9"
-            BuildableName = "PersonalDashboard.app"
-            BlueprintName = "PersonalDashboard"
-            ReferencedContainer = "container:PersonalDashboard.xcodeproj">
+            BuildableName = "Dailymalist.app"
+            BlueprintName = "Dailymalist"
+            ReferencedContainer = "container:Dailymalist.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -87,9 +87,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "E16054412FE6DE9300C66ED9"
-            BuildableName = "PersonalDashboard.app"
-            BlueprintName = "PersonalDashboard"
-            ReferencedContainer = "container:PersonalDashboard.xcodeproj">
+            BuildableName = "Dailymalist.app"
+            BlueprintName = "Dailymalist"
+            ReferencedContainer = "container:Dailymalist.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

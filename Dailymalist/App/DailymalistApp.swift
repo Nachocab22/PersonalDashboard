@@ -1,6 +1,6 @@
 //
-//  PersonalDashboardApp.swift
-//  PersonalDashboard
+//  DailymalistApp.swift
+//  Dailymalist
 //
 //  Created by Nachete on 20/06/2026.
 //
@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 @main
-struct PersonalDashboardApp: App {
+struct DailymalistApp: App {
     private let sharedModelContainer: ModelContainer = {
         let schema = Schema([
             TaskItem.self,

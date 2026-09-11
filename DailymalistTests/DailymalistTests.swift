@@ -1,13 +1,13 @@
 //
-//  PersonalDashboardTests.swift
-//  PersonalDashboardTests
+//  DailymalistTests.swift
+//  DailymalistTests
 //
 //  Created by Nachete on 20/06/2026.
 //
 
 import Testing
 
-struct PersonalDashboardTests {
+struct DailymalistTests {
 
     @Test func example() async throws {
         // Write your test here and use APIs like `#expect(...)` to check expected conditions.

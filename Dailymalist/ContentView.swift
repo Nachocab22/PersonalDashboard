@@ -1,6 +1,6 @@
 //
 //  ContentView.swift
-//  PersonalDashboard
+//  Dailymalist
 //
 //  Created by Nachete on 20/06/2026.
 //

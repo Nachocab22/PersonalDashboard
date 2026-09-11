@@ -1,13 +1,13 @@
 //
-//  PersonalDashboardUITestsLaunchTests.swift
-//  PersonalDashboardUITests
+//  DailymalistUITestsLaunchTests.swift
+//  DailymalistUITests
 //
 //  Created by Nachete on 20/06/2026.
 //
 
 import XCTest
 
-final class PersonalDashboardUITestsLaunchTests: XCTestCase {
+final class DailymalistUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true

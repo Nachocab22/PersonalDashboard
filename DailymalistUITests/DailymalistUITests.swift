@@ -1,13 +1,13 @@
 //
-//  PersonalDashboardUITests.swift
-//  PersonalDashboardUITests
+//  DailymalistUITests.swift
+//  DailymalistUITests
 //
 //  Created by Nachete on 20/06/2026.
 //
 
 import XCTest
 
-final class PersonalDashboardUITests: XCTestCase {
+final class DailymalistUITests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
