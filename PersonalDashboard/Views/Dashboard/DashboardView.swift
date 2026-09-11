@@ -86,7 +86,7 @@ struct TitleSection: View {
         HStack(alignment: .top) {
             VStack(alignment: .leading){
 
-                Text("Dashboard")
+                Text("Dailymalist")
                     .font(.custom("Default", size: 50))
                     .bold()
                 HStack(alignment: .center){
