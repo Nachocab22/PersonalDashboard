@@ -67,6 +67,7 @@ struct AgendaView: View {
                 } label: {
                     Image(systemName: "calendar.badge.checkmark")
                 }.buttonStyle(.glassProminent)
+                    .padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20))
             }
             selectedCalendarIDs.isEmpty ? Text("Selecciona los calendarios que mostrar").padding() : nil
             if calendarError != nil {

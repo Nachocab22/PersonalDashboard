@@ -1,0 +1,111 @@
+{
+  "fill" : {
+    "automatic-gradient" : "srgb:0.04314,0.29412,0.21176,1.00000"
+  },
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "image-name" : "08-pencil-tip.svg",
+          "name" : "08-pencil-tip"
+        },
+        {
+          "image-name" : "07-pencil-wood.svg",
+          "name" : "07-pencil-wood"
+        },
+        {
+          "glass" : false,
+          "image-name" : "06-pencil-highlight.svg",
+          "name" : "06-pencil-highlight"
+        },
+        {
+          "image-name" : "05-pencil-body.svg",
+          "name" : "05-pencil-body"
+        }
+      ],
+      "name" : "lapiz",
+      "position" : {
+        "scale" : 1,
+        "translation-in-points" : [
+          12,
+          -25
+        ]
+      },
+      "shadow" : {
+        "kind" : "layer-color",
+        "opacity" : 0.5
+      },
+      "specular" : false,
+      "translucency" : {
+        "enabled" : false,
+        "value" : 0.5
+      }
+    },
+    {
+      "blur-material" : null,
+      "layers" : [
+        {
+          "blend-mode-specializations" : [
+            {
+              "appearance" : "tinted",
+              "value" : "plus-darker"
+            }
+          ],
+          "glass" : false,
+          "image-name" : "04-completed-check.svg",
+          "name" : "04-completed-check"
+        },
+        {
+          "fill-specializations" : [
+            {
+              "appearance" : "tinted",
+              "value" : {
+                "solid" : "extended-srgb:0.00000,0.53333,1.00000,1.00000"
+              }
+            }
+          ],
+          "image-name" : "03-completed-marker.svg",
+          "name" : "03-completed-marker"
+        },
+        {
+          "image-name" : "02-checklist-neutral.svg",
+          "name" : "02-checklist-neutral"
+        }
+      ],
+      "name" : "chechlist",
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "specular" : false,
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.2
+      }
+    },
+    {
+      "layers" : [
+        {
+          "image-name" : "01-checklist-card.svg",
+          "name" : "01-checklist-card"
+        }
+      ],
+      "name" : "Tarjeta",
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "specular" : true,
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.35
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}
